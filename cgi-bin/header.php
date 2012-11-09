@@ -8,9 +8,9 @@
 <?php
 if(isset($_SESSION['logged_in']))
 {	
-	echo "<form method='POST' class='logout_button' action='logout.php'>";
-    echo "<input type='submit' id='logout' name='logout' value='logout' />";
-	echo "</form>";
+	echo "<a href='logout.php' class='logout_button' action='logout.php'>";
+    echo "Logout";
+	echo "</a>";
 }
 ?>
 

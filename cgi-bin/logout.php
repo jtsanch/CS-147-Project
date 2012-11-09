@@ -1,7 +1,8 @@
 <?
-	$_SESSION = array();
+	session_start();
+	//$_SESSION = array();
 	session_unset(); 
 	session_destroy();
-	header("location : index.php");
+	header( 'Location: index.php' ) ;
 	echo "You have successfully logged out!";
 ?>
