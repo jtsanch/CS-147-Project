@@ -73,6 +73,7 @@ $(function(){
 					}
 				}
 			});
+		$(this).popup('close');
 		return false;
 	});
 	$("#logout").click(function() {
