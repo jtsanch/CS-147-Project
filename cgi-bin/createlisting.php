@@ -1,73 +1,46 @@
-w<?php
+<?php
 session_start();
 if(!isset($_SESSION['logged_in']))
 {
-	die("To access this page, you need to <a href='index.php'>LOGIN</a>");
+	$_SESSION['message'] = "<p class='error'> You need to Login to view this page </p>";
+	header( 'Location: index.php' ) ;
 }
 ?>
+
 <html>
 <head>
-	<?php include 'head.php'?>
+	<?php include 'head.php';?>
 </head>
 <body>
+
 <?php
 	include 'header.php';
 ?>
-<?php
-if($_POST)
-{
-	require_once 'config.php';
-	
-	$email = mysql_real_escape_string($_SESSION['email']);
-	$user = mysql_fetch_array(mysql_query("SELECT userID FROM Users WHERE email='{$email}'"));
-	$userID = $user['userID'];
-	
-	$skillName = mysql_real_escape_string($_POST['skillName']);
-	$skill = mysql_fetch_array(mysql_query("SELECT skillID FROM skills WHERE skillName='" . $skillName . "'"));
-	$skillID = NULL;
-	$category = mysql_real_escape_string($_POST['category']);
-	$categoryId = mysql_fetch_array(mysql_query("Select categoryId from categories where category='$category'"));
-	
-	if(!$skill)
-	{
-		mysql_query("INSERT INTO skills (skillName,categoryID) VALUES ('$skillName','$categoryId)");
-		$skill = mysql_fetch_array(mysql_query("SELECT skillID FROM skills WHERE skillName='" . $skillName . "'"));
-	}
-	$skillID = $skill['skillID'];
-	$lesson_description = mysql_real_escape_string($_POST['lesson_description']);
-	$experience = mysql_real_escape_string($_POST['experience']);
-	$cost = mysql_real_escape_string($_POST['cost']);
-	if(mysql_query("INSERT INTO Lessons (userID,lesson_description,experience,cost,skillID,categoryId) VALUES ('$userID','$lesson_description','$experience','$cost','$skillID','$categoryId')"))
-
-		$_SESSION['notice'] = "Listing created!";
-		$_SESSION['wait_for_redirect'] = "WAIT!";
-		echo "<script>$(function(){window.location.href='http://www.stanford.edu/~jtsanch/cgi-bin/skill-searcher/profile.php'});</script>";
-	} else {
-		$_SESSION['notice'] = "You messed up somewhere";
-	}
-}
+<br>
+<center>
+<div id="message">
+<?
+	/*In the case we have any sort of user feedback on logging in, registering, creating listing, etc*/
+	if(isset($_SESSION['message'])) 
+		{
+			echo $_SESSION['message'];
+			unset($_SESSION['message']);
+		}
 ?>
-<div class="notice_top">
-<?php
-	if(isset($_SESSION['notice']))
-	{
-		echo $_SESSION['notice'];
-		if(!$_SESSION['wait_for_redirect']) unset($_SESSION['notice']);
-	} else echo "&nbsp;";
-?>
-</div>
+	</div>
+</center>
 <br>
 <form action="createlisting.php" method="post">
 	<div style="padding:10px 20px;">
 		<h3>Create Listing</h3>
-        <label for="sk" class="ui-hidden-accessible">Skill</label>
+        <label for="sk" class="ui-hidden-accessible">Skill*:</label>
         <input type="text" name="skillName" id="sk" value="" placeholder="Skill" />
 		<br />
-		<label for="ld" class="ui-hidden-accessible">Lesson Description</label>
+		<label for="ld" class="ui-hidden-accessible">Lesson Description*:</label>
         <textarea cols="40" rows="8" name="lesson_description" id="ld" value="" placeholder="Lesson Description"></textarea>
         <br />
 		<label for="select-choice-0" name="category" class="select">Category:</label>
-			<select name="select-choice-0" id="select-choice-0">
+		<select name="category" id="category">
 			<option value="sports">Sports</option>
 			<option value="music">Music</option>
 			<option value="writing">Art</option>
@@ -75,10 +48,10 @@ if($_POST)
 			<option value="crafts">Crafts</option>
 			<option value="miscellaneous">Miscellaneous</option>
 		</select>
-		<label for="exp" class="ui-hidden-accessible">Experience</label>
-        <textarea cols="40" rows="8" name="experience" id="exp" value="" placeholder="Experience"></textarea>
+		<label for="experience">Experience*:</label><br />
+		Beginner <input type="range" name="experience" id="slider-step" value="50" min="0" max="100" step="4" /> Advanced
 		<br />
-		<label for="cst" class="ui-hidden-accessible">Cost Per Hour</label>
+		<label for="cst" class="ui-hidden-accessible">Cost Per Hour*:</label>
         <input type="text" name="cost" id="cst" value="" placeholder="Cost Per Hour"  />
 		<br />
 		<div class="profile_option">
@@ -86,5 +59,120 @@ if($_POST)
 		</div>
 	</div>
 </form>
+
+<?php
+if($_POST)
+{
+	require_once "formvalidator.php";
+	$validator = new FormValidator();
+	$validator->addValidation('skillName','req','Fill in a skillname so we know what you\'re teaching!');
+	$validator->addValidation('cost','req','Are you free? Then just put in 0 so students can know!');
+	$validator->addValidation('lesson_description','req','Surely you must have something to say about what your skill...');
+	//make sure that form is ok to send
+	if(!$validator->ValidateForm())
+	{
+		$message = "<B>Validation Errors:</B>";
+		$error_hash = $validator->GetErrors();
+		foreach($error_hash as $inpname => $inp_err)
+		{
+			$message.="<p>$inpname : $inp_err</p>\n";
+		}
+		echo "<div data-role='popup' id='popupMessage'>".$message."</div>";
+		echo "<script>$('#popupMessage').popup();</script>";
+	}
+	else{
+	require_once 'config.php';
+	
+	//grab the email and the user associated with it
+	$userID = $_SESSION['userID'];
+	
+	//grab the skill they are posting, along with the category they are choosing
+	$skillName = mysql_real_escape_string($_POST['skillName']);
+	$skillRows = mysql_query("SELECT * FROM skills WHERE skillName='$skillName'");
+	$category_text = mysql_real_escape_string($_POST['category']);
+	$category = mysql_fetch_array(mysql_query("Select * from categories where categoryName='$category_text'"));
+	$categoryID = $category['categoryID'];
+	
+	$skill = mysql_fetch_array($skillRows);
+	//make sure that the skill will exists
+	if(!(mysql_num_rows($skillRows) > 0 ))
+	{
+		mysql_query("INSERT INTO skills (skillName,categoryID) VALUES ('$skillName','$categoryID')");
+	}
+	
+	//else, we want to use the skillid we found
+	$skill = mysql_fetch_array(mysql_query("SELECT skillId FROM skills WHERE skillName='$skillName'"));
+	$skillID = $skill['skillId'];
+	$lesson_description = mysql_real_escape_string($_POST['lesson_description']);
+	$experience = $_POST['experience'];
+	$cost = mysql_real_escape_string($_POST['cost']);
+	//insert into the database
+	$insert_query = "INSERT INTO Lessons (userID, lesson_description, experience, skillID, cost, categoryID) VALUES ('$userID','$lesson_description','$experience','$skillID','$cost','$categoryID')";
+	mysql_query($insert_query) or die(mysql_error());
+	$_SESSION['message'] = "<p class='success'>Listing created!</p>";
+	echo "<script> $.mobile.changePage( 'index.php', { transition: 'slideup'} ); </script>";
+	}
+}
+?>
+
+<div data-role="popup" id="login_popup" data-overlay-theme="b" data-theme="a" class="ui-corner-all" data-position-to="window" data-dismissable="false">
+	    <form id="login_form" name="login_form" action="login.php" method="post">
+		<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" style=" float:left;">Close</a>
+		<div style="padding:10px 20px;">
+			<h3>Please sign in</h3>
+		    <label for="email" class="ui-hidden-accessible">Username:</label>
+		    <input type="text" name="email" id="email" id="un" placeholder="user@email.com" data-theme="a" />
+
+	        <label for="password" class="ui-hidden-accessible">Password:</label>
+	        <input type="password" name="password" id="password"  placeholder="password" data-theme="a" />
+
+	    	<input type="submit" id="login" name="login" value="Login"></input>
+		</div>
+	</form>
+</div>
+
+
+<script type="text/javascript">
+$(function(){	
+	$("#login").click(function() {
+		var action = $("#login_form").attr("action");
+		var form_data = {
+			email: $("#email").val(),
+			password: $("#password").val(),
+			is_ajax: 1
+		};
+		$.ajax({
+				type: "POST",
+				url: action,
+				data: form_data,
+				success: function(response) {
+					if( response == "success")
+					{
+						location.reload();
+					}
+					else
+					{
+						location.reload();
+					}
+				}
+			});
+		$(this).popup('close');
+		return false;
+	});
+	$("#logout").click(function() {
+		var action = $("#logout_button").attr("action");
+		$.ajax({
+				type: "POST",
+				url: action,
+				data: 0,
+				success: function(response){
+					$("$message").html("<p class='success'> You have logged out successfully! </p>");
+				}
+				});
+		return false;
+	});
+});
+</script>
+
 </body>
 </html>

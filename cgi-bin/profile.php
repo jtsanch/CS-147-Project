@@ -2,7 +2,9 @@
 session_start();
 if(!isset($_SESSION['logged_in']))
 {
-	die("To access this page, you need to <a href='index.php'>LOGIN</a>");
+	//die("To access this page, you need to <a href='index.php'>LOGIN</a>");
+	$_SESSION['login_results'] = "<p class='error'> You need to Login to view this page </p>";
+	header( 'Location: index.php' ) ;
 }
 ?>
 <html>
@@ -16,20 +18,19 @@ if(!isset($_SESSION['logged_in']))
 <?php
 $link = mysql_connect('mysql-user-master.stanford.edu', 'ccs147meseker', 'ceivohng');
 mysql_select_db('c_cs147_meseker');
+$user = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='" . $_SESSION['userID'] . "'"));
 
-$user = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE email='" . $_SESSION['email'] . "'"));
 $lessons = mysql_query("SELECT * FROM Lessons WHERE userID='" . $user['userID'] . "'");
 
+$all_inmail = mysql_query("SELECT * FROM Mail WHERE EmailTo='" . $user['email'] . "'");
+$num_messages = mysql_num_rows($all_inmail);
 ?>
-	<div id="first_layer_profile">
-		<h1 id="profile_header">User Profile</h1>
-	</div>
 	<div id="mini_nav">
 		<ul style="list-style-type:none;float:left;">
-			<li>Hi, <?php echo $_SESSION['name'] ?></li>
+			<li><strong>Hi, <?php echo $_SESSION['name'] ?></strong></li>
 		</ul>
-		<ul style="list-style-type:none;float:right;padding-right:15px">
-			<li style="display:inline;"><a href="editprofile.php">Edit</a></li>
+		<ul style="list-style-type:none;float:right;padding-right:5px">
+			<li style="display:inline;"><a href="mail.php">Mail (<?php echo $num_messages ?>)</a></li>
 		</ul>
 	</div>
 	<div id="profile_wrapper">
@@ -37,65 +38,60 @@ $lessons = mysql_query("SELECT * FROM Lessons WHERE userID='" . $user['userID'] 
 			<?php
 			if(isset($_SESSION['notice']))
 			{
-	    
-
-		echo $_SESSION['notice'];
+				echo $_SESSION['notice'];
 				unset($_SESSION['notice']);
 			} else echo "&nbsp;";
 			?>
 		</div>
 		<div id="second_layer_profile">
-			<div id="user_pic_container"><img src="user.png" id="user_pic" /></div>
-			<div id="personal_info_container">
-				<table id="personal_info">
-					<tr><td><?php echo $_SESSION['name'] ?></td></tr>
-					<tr><td><?php echo $_SESSION['email'] ?></td></tr>
-					<tr><td>LOCATION</td></tr>
-				</table>
-			</div>
-		</div>
-		<br /><br />
-		<div id="third_layer_profile">
-			<div class="lesson_info_container">
-				<div class="lesson_info">
-					<u><strong>TEACHING</strong></u><br/><br/>
+			<!--<div id="user_pic_container"><img src="user.png" id="user_pic" /></div>-->
+			<!--<div id="personal_info_container">
+
+			</div> -->
+			<br/>
+			<div class="lesson_info">
+					<div class="profile_name_header">I'M TEACHING</div><br/>
 					<?php
 					while($row = mysql_fetch_array($lessons))
 					{
-						echo "LESSON DESCRIPTION<br/>";
+						echo "<div class='profile_lesson_header'>Lesson</div>";
 						echo $row['lesson_description'] . "<br/><br/>";
-						echo "EXPERIENCE<br/>";
+						echo "<div class='profile_lesson_header'>Experience</div>";
 						echo $row['experience'] . "<br/><br/>";
-						echo "COST PER HOUR<br/>";
-						echo $row['cost'] . "<br/><br/><hr noshade size=1><br/><br/>";
+						echo "<div class='profile_lesson_header'>Cost</div>";
+						echo $row['cost'] . "<br/>";
+						echo "<form action='editprofile.php' method='post'>";
+						echo "<input type='hidden' name='lessonID' value='" . $row['lessonID'] ."'>";
+						echo "<input type='hidden' name='dont_update' value='dont_update'>";
+						echo "<div data-role='controlgroup' data-type='horizontal'>";
+						echo "<button type='submit'>Edit Lesson</button>";
+						echo "</div>";
+						echo "</form>";
+						echo "<br/><hr noshade size=1><br/><br/>";
 					}
 					?>
 				</div>
-			</div>
 			<div class="profile_option">
 				<a href="createlisting.php" data-role="button">Create Listing</a>
 			</div>
-			<br />
-			<br />
-			<br />
-			<div class="lesson_info_container">	
-				<table class="lesson_info">
-					<tr><td><u><strong>LEARNING</strong></u></td></tr>
-					<tr><td>LESSON DESCRIPTION (for teacher)</td></tr>
-					<tr><td>EXPERIENCE (for teacher)</td></tr>
-					<tr><td>COST PER HOUR (for teacher)</td></tr>
-				</table>
-			</div>
-			<div class="profile_option">
-				<a href="findlisting.php" data-role="button">Find a Teacher</a>
-			</div>
+			<br/>
 		</div>
-		<div id="fourth_layer_profile">
-			<div id="availability_info_container">
-				<table id="availability_info">
-					<tr><td>AVAILABILITY CALENDAR</td></tr>
+
+		<div id="third_layer_profile">
+			<!--<div class="lesson_info_container">
+				
+			</div>-->
+			<div class="profile_footer">
+
+				<br/>
+				<div class="lesson_info">
+					<!--<div class="profile_name_header">I'M LEARNING</div><br/>-->
+				</div>
+				<div class="profile_option">
+					<a href="findlisting.php" data-role="button">Find a Teacher</a>
+				</div>
 				</table>
-			</div>
+
 		</div>
 	</div>
 </body>

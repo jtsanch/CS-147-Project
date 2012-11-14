@@ -47,13 +47,17 @@
 		$password = sanitize($_POST['password']);
 	
 		$salt = bin2hex(mcrypt_create_iv(32, MCRYPT_DEV_URANDOM));
-		echo $salt."<br><br>";
 		$hash = crypt($password,$salt);
-		echo $hash."<br><br>";
 		$user = mysql_fetch_array( mysql_query("SELECT * FROM Users WHERE email='" . $email . "'"));
 	
 		if (!($fetch = mysql_fetch_array( mysql_query("SELECT email FROM Users WHERE email='$email'")))){
 			mysql_query("INSERT INTO Users (name, password,salt,email) VALUES ('$name', '$hash', '$salt', '$email')") or die(mysql_error());
+			$new_user = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE email='{$email}'"));
+			$_SESSION['name'] = $new_user['name'];
+			$_SESSION['logged_in'] = "YES";
+			$_SESSION['userID'] = $new_user['userID'];
+			$_SESSION['message'] = "<p class='success'>Welcome ".$new_user['name']."!</p>";
+			echo "<script> $.mobile.changePage( 'index.php', { transition: 'slideup'} ); </script>";
 		}
 		else{
 			echo "Sorry! $email is already in the base";
@@ -66,5 +70,65 @@
 	}
 ?>
 </div>
+
+<div data-role="popup" id="login_popup" data-overlay-theme="b" data-theme="a" class="ui-corner-all" data-position-to="window" data-dismissable="false">
+	    <form id="login_form" name="login_form" action="login.php" method="post">
+		<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" style=" float:left;">Close</a>
+		<div style="padding:10px 20px;">
+			<h3>Please sign in</h3>
+		    <label for="email" class="ui-hidden-accessible">Username:</label>
+		    <input type="text" name="email" id="email" id="un" placeholder="user@email.com" data-theme="a" />
+
+	        <label for="password" class="ui-hidden-accessible">Password:</label>
+	        <input type="password" name="password" id="password"  placeholder="password" data-theme="a" />
+
+	    	<input type="submit" id="login" name="login" value="Login"></input>
+		</div>
+	</form>
+</div>
+
+
+<script type="text/javascript">
+$(function(){	
+	$("#login").click(function() {
+		var action = $("#login_form").attr("action");
+		var form_data = {
+			email: $("#email").val(),
+			password: $("#password").val(),
+			is_ajax: 1
+		};
+		$.ajax({
+				type: "POST",
+				url: action,
+				data: form_data,
+				success: function(response) {
+					if( response == "success")
+					{
+						location.reload();
+					}
+					else
+					{
+						location.reload();
+					}
+				}
+			});
+		$(this).popup('close');
+		return false;
+	});
+	$("#logout").click(function() {
+		var action = $("#logout_button").attr("action");
+		$.ajax({
+				type: "POST",
+				url: action,
+				data: 0,
+				success: function(response){
+					$("$message").html("<p class='success'> You have logged out successfully! </p>");
+				}
+				});
+		return false;
+	});
+});
+</script>
+
 </body>
 </html>

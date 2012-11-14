@@ -15,10 +15,11 @@
 <center>
 <div id="message">
 <?
-	if(isset($_SESSION['login_results'])) 
+	/*In the case we have any sort of user feedback on logging in, registering, creating listing, etc*/
+	if(isset($_SESSION['message'])) 
 		{
-			echo $_SESSION['login_results'];
-			unset($_SESSION['login_results']);
+			echo $_SESSION['message'];
+			unset($_SESSION['message']);
 		}
 ?>
 	</div>
@@ -26,9 +27,9 @@
 
 <div id="home_options_container">
 	<div id="home_options">
-		<a href="createlisting.php" data-role="button"> Create Listing! </a>
+		<a href="createlisting.php" data-role="button"> Teach </a>
 		<br />
-		<a href="findlisting.php" data-role="button"> Find a Teacher! </a>
+		<a href="findlisting.php" data-role="button"> Learn </a>
 	</div>
 </div>
 
