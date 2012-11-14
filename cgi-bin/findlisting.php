@@ -34,9 +34,9 @@
 		echo "<li><a> ".$categoryRow['categoryName']." </a></li>";
 		echo "<ul>";
 		$skills = mysql_query("SELECT * FROM categories WHERE categoryId='$categoryId'");
-		while( $row = mysql_fetch_assoc($skills) ){
-			
-			echo "<li><a href='search.php?target=".$row['skillName']."></li>";
+		while( $row = mysql_fetch_assoc($skills) )
+		{
+			echo "<li class='ui-li-count ui-btn-up-c ui-btn-corner-all'><a href='search.php?target=".$row['skillName']."></li>";
 		}
 		echo "</ul>";
 		echo "</li>";
