@@ -31,9 +31,8 @@ if(isset($_SESSION['logged_in']))
 		{
 			echo "<li><a href='#login_popup' data-icon='custom' data-rel='popup'";
 			echo "data-transition='slidedown' id='login_button'>Login</a></li>";
-			echo "<li><a href='createprofile.php' data-icon='custom'";
-			echo "data-transition='slidedown' id='register_button'>Register</a></li>";
+			echo "<li><a href='createprofile.php' data-icon='custom'data-transition='slidedown' id='register_button'>Register</a></li>";
 		}
-	?>
+		?>
 	</ul>
 </div>

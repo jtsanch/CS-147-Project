@@ -1,44 +1,137 @@
+<?php
+	session_start();
+?>
 <html>
 <head>
-    <title>Skill Searcher</title>
-    <link rel="Stylesheet" rev="Stylesheet" href="css/main.css" /> 
-    <title>Skill Searcher</title> 
-    <meta charset="utf-8">
-	<meta name="apple-mobile-web-app-capable" content="yes">
- 	<meta name="apple-mobile-web-app-status-bar-style" contsent="black">
-	<meta name="viewport" content="width=device-width, initial-scale=1"> 
-
-	<link rel="stylesheet" href="jquery.mobile-1.2.0.css" />
-
-	<link rel="stylesheet" href="style.css" />
-	<link rel="apple-touch-icon" href="appicon.png" />
-	<link rel="apple-touch-startup-image" href="startup.png">
-	
-	<script src="jquery-1.8.2.min.js"></script>
-	<script src="jquery.mobile-1.2.0.js"></script>
+	<?php include 'head.php'?>
 </head>
 <body>
-<div id="header">
-	<center>
-		Skill Searcher
-	</center>
-</div>
-<div id="navigation_bar">
-	<!--This div will be responsible for holding the username/logout, or the login_in if they are not logged in-->
-	<div id="left_user_part">
-		Hello Username
-		<br>
-		<small><i><a href="index.html"> logout </a></i></small>
-	</div>
-	<div id="right_button_part" data-role="controlgroup" data-type="horizontal">
-		<a href="index.html" data-role="button"> HOME </a>
-		<a href="profile.html" data-role="button"> PROFILE </a>
-		<a href="mail.html" data-role="button"> MAIL </a>
-	</div>
-</div>
+<?php
+	include 'header.php';
+?>
+
+
+<div data-role="controlgroup" data-type="horizontal">
+			<a href="#" data-role="button" id="inbox_button">Inbox</a>
+			<a href="#" data-role="button" id="outbox_button">Outbox</a>
+		</div>
+
 <br><br>
-<div id="content">
-Here we have most of the stuff
+
+<div id="inbox">
+	
+	<?php
+	$email = $_SESSION['email'];
+	//$email = "shaurya@stanford.blah";
+
+	require_once 'config.php';
+	
+	$user = mysql_query("SELECT * FROM Mail WHERE EmailTo ='$email'");
+	$result = mysql_fetch_array($user);
+	
+	$id = mysql_real_escape_string($_SESSION['email']);
+	$sql = "SELECT * FROM Mail WHERE EmailTo='$email'";
+	$res = mysql_query($sql) or die(mysql_error());
+	
+
+	if (mysql_num_rows($res) == 0) {
+		echo "You haven't got any messages to display";
+	}
+	?>
+
+	<div id="content">
+
+	<ul data-role="listview">
+				<?php
+				//$_SESSION['EmailTo'] = $row['EmailTo'];
+				//$_SESSION['Subject'] = $row['Subject'];
+				//$_SESSION['Message'] = $row['Message'];
+				while ($row = mysql_fetch_assoc($res)) {
+    				echo "<form action='messagedisplay.php' method='post'>";
+    				echo "<input type='hidden' name='EmailTo' value='" . $row['EmailTo'] . "'>";
+    				echo "<input type='hidden' name='Subject' value='" . $row['Subject'] . "'>";
+    				echo "<input type='hidden' name='Message' value='" . $row['Message'] . "'>";
+    				echo "<button type ='submit' >";
+    				echo "To: ";
+    				echo $row['EmailTo'];
+    				echo "<br/> Subject: ";
+    				echo $row['Subject'];
+    				echo "</button>";
+    				echo "</form>";
+				}
+				?>
+		</ul>
+	</div>
 </div>
+
+<div id="outbox" class="hide">
+	
+	<?php
+	//$email = $_SESSION['email'];
+	$email = "shaurya@stanford.blah";
+
+	require_once 'config.php';
+	
+	$user = mysql_query("SELECT * FROM Mail WHERE EmailFrom ='$email'");
+	$result = mysql_fetch_array($user);
+	
+	$id = mysql_real_escape_string($_SESSION['email']);
+	$sql = "SELECT * FROM Mail WHERE EmailFrom='$email'";
+	$res = mysql_query($sql) or die(mysql_error());
+	
+
+	if (mysql_num_rows($res) == 0) {
+		echo "You haven't got any messages to display";
+	}
+	?>
+
+	<div id="content">
+
+	<ul data-role="listview">
+				<?php
+				//$_SESSION['EmailTo'] = $row['EmailTo'];
+				//$_SESSION['Subject'] = $row['Subject'];
+				//$_SESSION['Message'] = $row['Message'];
+				while ($row = mysql_fetch_assoc($res)) {
+    				echo "<form action='messagedisplay.php' method='post'>";
+    				echo "<input type='hidden' name='EmailTo' value='" . $row['EmailTo'] . "'>";
+    				echo "<input type='hidden' name='Subject' value='" . $row['Subject'] . "'>";
+    				echo "<input type='hidden' name='Message' value='" . $row['Message'] . "'>";
+    				echo "<button type ='submit' >";
+    				echo "To: ";
+    				echo $row['EmailTo'];
+    				echo "<br/> Subject: ";
+    				echo $row['Subject'];
+    				echo "</button>";
+    				echo "</form>";
+				}
+				?>
+		</ul>
+	</div>
+</div>
+
+
 </body>
+<footer>
+	<script>
+	 $(function() {
+	 	$("#outbox_button").click(function() {
+	 		if($("#outbox").hasClass("hide"))
+	 		{
+	 			$("#outbox").removeClass("hide");
+	 			$("#inbox").addClass("hide");
+	 		}
+	 	});
+	 	$("#inbox_button").click(function() {
+	 		if($("#inbox").hasClass("hide")) 
+	 		{
+	 			$("#inbox").removeClass("hide");
+	 			$("#outbox").addClass("hide");
+	 		}
+	 	});
+
+	 });
+	</script>
+</footer>
+
 </html>

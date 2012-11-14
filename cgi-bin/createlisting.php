@@ -1,4 +1,4 @@
-<?php
+w<?php
 session_start();
 if(!isset($_SESSION['logged_in']))
 {
@@ -25,17 +25,20 @@ if($_POST)
 	$skillName = mysql_real_escape_string($_POST['skillName']);
 	$skill = mysql_fetch_array(mysql_query("SELECT skillID FROM skills WHERE skillName='" . $skillName . "'"));
 	$skillID = NULL;
+	$category = mysql_real_escape_string($_POST['category']);
+	$categoryId = mysql_fetch_array(mysql_query("Select categoryId from categories where category='$category'"));
+	
 	if(!$skill)
 	{
-		mysql_query("INSERT INTO skills (skillName) VALUES ('" . $skillName . "')");
+		mysql_query("INSERT INTO skills (skillName,categoryID) VALUES ('$skillName','$categoryId)");
 		$skill = mysql_fetch_array(mysql_query("SELECT skillID FROM skills WHERE skillName='" . $skillName . "'"));
 	}
 	$skillID = $skill['skillID'];
 	$lesson_description = mysql_real_escape_string($_POST['lesson_description']);
 	$experience = mysql_real_escape_string($_POST['experience']);
 	$cost = mysql_real_escape_string($_POST['cost']);
-	if(mysql_query("INSERT INTO Lessons (userID,lesson_description,experience,cost,skillID) VALUES ('" . $userID . "','" . $lesson_description . "','" . $experience . "','" . $cost . "','" . $skillID . "')"))
-	{
+	if(mysql_query("INSERT INTO Lessons (userID,lesson_description,experience,cost,skillID,categoryId) VALUES ('$userID','$lesson_description','$experience','$cost','$skillID','$categoryId')"))
+
 		$_SESSION['notice'] = "Listing created!";
 		$_SESSION['wait_for_redirect'] = "WAIT!";
 		echo "<script>$(function(){window.location.href='http://www.stanford.edu/~jtsanch/cgi-bin/skill-searcher/profile.php'});</script>";
@@ -63,6 +66,15 @@ if($_POST)
 		<label for="ld" class="ui-hidden-accessible">Lesson Description</label>
         <textarea cols="40" rows="8" name="lesson_description" id="ld" value="" placeholder="Lesson Description"></textarea>
         <br />
+		<label for="select-choice-0" name="category" class="select">Category:</label>
+			<select name="select-choice-0" id="select-choice-0">
+			<option value="sports">Sports</option>
+			<option value="music">Music</option>
+			<option value="writing">Art</option>
+			<option value="academics">Academics</option>
+			<option value="crafts">Crafts</option>
+			<option value="miscellaneous">Miscellaneous</option>
+		</select>
 		<label for="exp" class="ui-hidden-accessible">Experience</label>
         <textarea cols="40" rows="8" name="experience" id="exp" value="" placeholder="Experience"></textarea>
 		<br />
@@ -70,7 +82,7 @@ if($_POST)
         <input type="text" name="cost" id="cst" value="" placeholder="Cost Per Hour"  />
 		<br />
 		<div class="profile_option">
-			<button type="submit" data-theme="b">CREATE</button>
+			<button type="submit" data-theme="b">create</button>
 		</div>
 	</div>
 </form>
