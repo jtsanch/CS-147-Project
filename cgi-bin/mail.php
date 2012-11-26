@@ -16,112 +16,58 @@ if(!isset($_SESSION['logged_in']))
 	include 'header.php';
 ?>
 
-<div data-role="controlgroup" data-type="horizontal">
-	<a href="#" data-role="button" id="inbox_button">Inbox</a>
-	<a href="#" data-role="button" id="outbox_button">Outbox</a>
-	<!--<a href="#" data-role="button">Compose</a>-->
-</div>
-
-<br><br>
-
 <div id="inbox">
 	<?php
 	require_once 'config.php';
 	$link = mysql_connect('mysql-user-master.stanford.edu', 'ccs147meseker', 'ceivohng');
 	mysql_select_db('c_cs147_meseker');
 	$userID = mysql_real_escape_string($_SESSION['userID']);
-	
-	$all_inmail = mysql_query("SELECT * FROM Mail WHERE EmailTo='$userID'") or die(mysql_error());
+	$MAX_MESSAGES = 10;
+	$threads_in = mysql_query("SELECT * FROM threads WHERE receiverUserID='$userID' ORDER BY timestamp DESC LIMIT $MAX_MESSAGES") or die(mysql_error());
+	$threads_out = mysql_query("SELECT * FROM threads WHERE initUserID='$userID' ORDER BY timestamp DESC LIMIT $MAX_MESSAGES") or die(mysql_error());
+	echo "<ul data-role='listview' data-inset='true' class='ui-listview ui-listview-inset ui-corner-all ui-shadow'>";
+	echo "<li data-role='list-divider' role='heading' class='ui-li ui-li-divider ui-bar-d'>Inbox</li>";
+	if (mysql_num_rows($threads_in) == 0) {
+		echo "<li data-corners='false' data-shadow='false' data-iconshadow='true' data-theme='d' class='ui-btn'> No incoming messages </li>";
+	}
+	else{
 
-	if (mysql_num_rows($all_inmail) == 0) {
-		echo "You haven't got any messages to display";
+	//Display all "incoming messages"
+	while ($threads_in !=null && $threadrow = mysql_fetch_assoc($threads_in)) {
+		$threadID = $threadrow['threadID'];
+		//get the freshest message
+		$message = mysql_fetch_array(mysql_query("SELECT * from Mail where threadID='$threadID' ORDER BY timestamp DESC LIMIT 1"));
+		//Make the li element
+		echo "<li data-corners='false' data-shadow='false' data-iconshadow='true' data-wrapperels='div' data-icon='back' data-iconpos='right' data-theme='d' class='ui-btn ui-btn-icon-right ui-li-has-arrow ui-li ui-btn-up-d'>";
+		echo "<a href='messagedisplay.php?thread_id=".$threadID."'>";
+		$from_user = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='".$message['EmailFrom']."'"));
+    	echo "<h2 class='ui-li-heading-mail'> From <a href='teacherprofile.php?teacher_userID=".$from_user['userID']."'>".$from_user['name']."</a></h2>";
+    	echo "<p class='ui-li-desc-mail'>".$message['Subject']."</p>";
+		echo "</a></li>";
+		}
+	}
+	echo "<li data-role='list-divider' role='heading' class='ui-li ui-li-divider ui-bar-d'>Outbox</li>";
+	//Display all the "outgoing messages"
+	if (mysql_num_rows($threads_out) == 0 ){
+		echo "<li data-corners='false' data-shadow='false' data-iconshadow='true' data-theme='d' class='ui-btn'> No outgoing messages </li></ul>";
+	}
+	else{
+	while ($threads_out !=null && $threadrow = mysql_fetch_assoc($threads_out)) {
+		$threadID = $threadrow['threadID'];
+		//grab the freshest memory, to them, it will be
+		$message = mysql_fetch_array(mysql_query("SELECT * from Mail where threadID='$threadID' ORDER BY timestamp DESC LIMIT 1"));
+		//Make the li element
+		echo "<li data-corners='false' data-shadow='false' data-iconshadow='true' data-wrapperels='div' data-icon='back' data-iconpos='right' data-theme='d' class='ui-btn ui-btn-icon-right ui-li-has-arrow ui-li ui-btn-up-d'>";
+		echo "<a href='messagedisplay.php?thread_id=".$threadID."'>";
+		$from_user = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='".$message['EmailTo']."'"));
+		//it's to that user
+    	echo "<h2 class='ui-li-heading' style='{color:darkblue;}'> To ".$from_user['name']."</h2>";
+    	echo "<p class='ui-li-desc'>".$message['Subject']."</p>";
+		echo "</a></li>";
+		}
+	echo "</ul>";
 	}
 	?>
-
-	<div id="content">
-
-	<ul data-role="listview">
-				<?php
-				//$_SESSION['EmailTo'] = $row['EmailTo'];
-				//$_SESSION['Subject'] = $row['Subject'];
-				//$_SESSION['Message'] = $row['Message'];
-				while ($row = mysql_fetch_assoc($all_inmail)) {
-    				echo "<form action='messagedisplay.php' method='post'>";
-    				echo "<input type='hidden' name='EmailFrom' value='" . $row['EmailFrom'] . "'>";
-    				echo "<input type='hidden' name='Subject' value='" . $row['Subject'] . "'>";
-    				echo "<input type='hidden' name='Message' value='" . $row['Message'] . "'>";
-    				echo "<button type ='submit' >";
-    				echo "From: ";
-					$from_user = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='".$row['EmailFrom']."'"));
-    				echo $from_user['name'];
-    				echo "<br/> Subject: ";
-    				echo $row['Subject'];
-    				echo "</button>";
-    				echo "</form>";
-				}
-				?>
-		</ul>
-	</div>
 </div>
-
-<div id="outbox" class="hide">
-	
-	<?php
-	//$email = $_SESSION['email'];
-	//$email = "shaurya@stanford.blah";
-	
-	$all_outmail = mysql_query("SELECT * FROM Mail WHERE EmailFrom='".$user['userID']."'") or die(mysql_error());
-	
-	if (mysql_num_rows($all_outmail) == 0) {
-		echo "You haven't got any messages to display";
-	}
-	?>
-
-	<div id="content">
-
-	<ul data-role="listview">
-				<?php
-				while ($row = mysql_fetch_assoc($all_outmail)) {
-					$fromUser = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='".$row['EmailFrom']."'"));
-    				echo "<form action='messagedisplay.php' method='post'>";
-    				echo "<input type='hidden' name='EmailTo' value='" . $row['EmailTo'] . "'>";
-    				echo "<input type='hidden' name='Subject' value='" . $row['Subject'] . "'>";
-    				echo "<input type='hidden' name='Message' value='" . $row['Message'] . "'>";
-    				echo "<button type ='submit' >";
-    				echo "To: ";
-    				echo $fromUser['name'];
-    				echo "<br/> Subject: ";
-    				echo $row['Subject'];
-    				echo "</button>";
-    				echo "</form>";
-				}
-				?>
-		</ul>
-	</div>
-</div>
-
-
 </body>
-<footer>
-	<script>
-	 $(function() {
-	 	$("#outbox_button").click(function() {
-	 		if($("#outbox").hasClass("hide"))
-	 		{
-	 			$("#outbox").removeClass("hide");
-	 			$("#inbox").addClass("hide");
-	 		}
-	 	});
-	 	$("#inbox_button").click(function() {
-	 		if($("#inbox").hasClass("hide")) 
-	 		{
-	 			$("#inbox").removeClass("hide");
-	 			$("#outbox").addClass("hide");
-	 		}
-	 	});
-
-	 });
-	</script>
-</footer>
-
 </html>

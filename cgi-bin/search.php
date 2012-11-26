@@ -75,7 +75,7 @@
 		$user = mysql_query($query);
 		$user_row = mysql_fetch_assoc($user);
 		//now create the output! :D
-		echo "<li data-theme='a' class='ui-btn ui-btn-icon-right ui-li ui-btn-up-c'>";
+		echo "<li data-theme='c' class='ui-btn ui-btn-icon-right ui-li ui-btn-up-c'>";
 		echo "<div class='ui-btn-inner ui-li'>";
 		echo "<div class='ut-btn-text'>";
 		echo "<a href=teacherprofile.php?teacher_userID=".$row['userID']."&lessonID=".$row['lessonID'].">";

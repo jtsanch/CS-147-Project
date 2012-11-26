@@ -25,16 +25,15 @@ session_start();
 </div>
 </center>
 <?php
-$link = mysql_connect('mysql-user-master.stanford.edu', 'ccs147meseker', 'ceivohng');
-mysql_select_db('c_cs147_meseker');
-
-if($_GET['teacher_userID'] && $_GET['lessonID'])
-{
-$teacher = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='" . $_GET['teacher_userID'] . "'"));
-$lessons = mysql_query("SELECT * FROM Lessons WHERE userID='" . $teacher['userID'] . "' AND lessonID='" . $_GET['lessonID'] . "'");
-}
-$user = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='" . mysql_real_escape_string($_SESSION['userID']) . "'"));
-?>
+	require_once 'config.php';
+	//Get the teacher id
+	if($_GET['teacher_userID'] && $_GET['lessonID'])
+	{
+		$teacher = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='" . $_GET['teacher_userID'] . "'"));
+		$lessons = mysql_query("SELECT * FROM Lessons WHERE userID='" . $teacher['userID'] . "' AND lessonID='" . $_GET['lessonID'] . "'");
+	}
+	$user = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='" . mysql_real_escape_string($_SESSION['userID']) . "'"));
+	?>
 	<div id="profile_wrapper">
 		<div class="notice_top">
 			<?php
@@ -103,7 +102,7 @@ $user = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='" . mys
 	</div>
 	<div data-role="popup" id="message_popup" class="ui-corner-all" data-position-to="window" data-dismissable="false">
 	<form id="message_form" action="processmail.php" method="post">
-		<div style="padding:10px 20px;"><?php echo $user['name'] ?></label></td></tr>
+		<div style="padding:10px 20px;"><?php echo "Sending to : ".$teacher['name'] ?></label></td></tr>
 			<input type="hidden" name="sender" id="sender" value="<?php echo $_SESSION['userID']?>" />
 			<br/>
 			<input type="hidden" name="receiver" id="receiver" value="<?php echo $teacher['userID']?>"/>
