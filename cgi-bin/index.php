@@ -1,5 +1,23 @@
 <?php
-	session_start();
+	if( !isset($_COOKIE['user']) )
+	{
+		//set the cookie for 20 years
+		setcookie(
+				"user",
+				"true",
+				time() + (20 * 365 * 24 * 60 * 60)
+		);
+		session_start();
+		/* Check to see if the user is logged in first, and that the cookie doesn't exist*/
+		if (!isset($_SESSION['logged_in']) ){
+			echo "<script> function showIntro(){ $( '#userIntro').popup( 'open') } </script>";
+			echo "<script> setTimeout(showIntro, 1222); </script>";
+		}
+	}
+	else
+	{
+		session_start();
+	}
 ?>
 <html>
 <head>
@@ -91,6 +109,15 @@ $(function(){
 	});
 });
 </script>
+
+<div data-role="popup" id="userIntro" class="userIntro">
+<p>
+	<p>Register and get access to high quality students and teachers today!</p>
+	<span><a href="#" data-rel="back" data-role="button" data-theme="a">No thanks!</a>
+	<a href='register.php' data-transition='flip' data-theme="b" data-role='button'> Register </a></span>	
+</p>
+</div>
+
 
 </body>
 </html>

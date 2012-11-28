@@ -1,7 +1,4 @@
-<?php
-
-session_start();
-
+<?
 if($_POST)
 {
 	require_once 'config.php';
@@ -13,8 +10,8 @@ if($_POST)
 	$message = mysql_real_escape_string($_REQUEST['message']);
 	$past_page = mysql_real_escape_string($_REQUEST['past_page']);
 	//put a new thread in
-	mysql_query("INSERT INTO threads (initUserID, receiverUserID) VALUES ('$senderID','$receiverID')");
-	$thread = mysql_fetch_array(mysql_query("SELECT * FROM threads WHERE initUserID='$senderID' AND receiverUserID='$receiverID'"));
+	mysql_query("INSERT INTO threads (initUserID, receiverUserID, UserIDConch) VALUES ('$senderID','$receiverID','$receiverID')") or die(mysql_error());  ;
+	$thread = mysql_fetch_array(mysql_query("SELECT * FROM threads WHERE initUserID='$senderID' AND receiverUserID='$receiverID'")) or die(mysql_error());  
 	//get the threadID so we can reference it later in with emails
 	$threadID = $thread['threadID'];
 	//add first mail item

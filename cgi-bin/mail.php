@@ -23,8 +23,11 @@ if(!isset($_SESSION['logged_in']))
 	mysql_select_db('c_cs147_meseker');
 	$userID = mysql_real_escape_string($_SESSION['userID']);
 	$MAX_MESSAGES = 10;
-	$threads_in = mysql_query("SELECT * FROM threads WHERE receiverUserID='$userID' ORDER BY timestamp DESC LIMIT $MAX_MESSAGES") or die(mysql_error());
-	$threads_out = mysql_query("SELECT * FROM threads WHERE initUserID='$userID' ORDER BY timestamp DESC LIMIT $MAX_MESSAGES") or die(mysql_error());
+	/*
+	 *Who has the conch for speaking next (like who should speak next!)
+	 */
+	$threads_in = mysql_query("SELECT * FROM threads WHERE UserIDConch='$userID' ORDER BY timestamp DESC LIMIT $MAX_MESSAGES") or die(mysql_error());
+	$threads_out = mysql_query("SELECT * FROM threads WHERE ( (initUserID='$userID' OR receiverUserID='$userID') AND UserIDConch != '$userID') ORDER BY timestamp DESC LIMIT $MAX_MESSAGES") or die(mysql_error());
 	echo "<ul data-role='listview' data-inset='true' class='ui-listview ui-listview-inset ui-corner-all ui-shadow'>";
 	echo "<li data-role='list-divider' role='heading' class='ui-li ui-li-divider ui-bar-d'>Inbox</li>";
 	if (mysql_num_rows($threads_in) == 0) {
@@ -41,7 +44,7 @@ if(!isset($_SESSION['logged_in']))
 		echo "<li data-corners='false' data-shadow='false' data-iconshadow='true' data-wrapperels='div' data-icon='back' data-iconpos='right' data-theme='d' class='ui-btn ui-btn-icon-right ui-li-has-arrow ui-li ui-btn-up-d'>";
 		echo "<a href='messagedisplay.php?thread_id=".$threadID."'>";
 		$from_user = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='".$message['EmailFrom']."'"));
-    	echo "<h2 class='ui-li-heading-mail'> From <a href='teacherprofile.php?teacher_userID=".$from_user['userID']."'>".$from_user['name']."</a></h2>";
+    	echo "<h2 class='ui-li-heading-mail'> From ".$from_user['name']."</h2>";
     	echo "<p class='ui-li-desc-mail'>".$message['Subject']."</p>";
 		echo "</a></li>";
 		}

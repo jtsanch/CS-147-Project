@@ -14,10 +14,11 @@
 		$thread_id = $_REQUEST['thread_id'];
 		$receiverUserID = $_REQUEST['user_to'];
 		$subject = $_REQUEST['subject_reply'];
-		mysql_query("UPDATE threads SET timestamp_trigger = timestamp_trigger+1");
-		mysql_query("INSERT INTO Mail (EmailFrom, EmailTo, Message, Subject, threadID) VALUES ('".$_SESSION['userID']."', '$receiverUserID', '$reply_message', '$subject', '$thread_id')");
+		mysql_query("UPDATE threads SET UserIDConch='$receiverUserID' WHERE threadID='$thread_id'")or die(mysql_error());;
+		mysql_query("INSERT INTO Mail (EmailFrom, EmailTo, Message, Subject, threadID) VALUES ('".$_SESSION['userID']."', '$receiverUserID', '$reply_message', '$subject', '$thread_id')")or die(mysql_error());;
 		echo "success";
 	}
 	else
-		echo "failure";
+		$_SESSION['message'] = "<p class='error'> Sorry, we couldn't send that, try again. </p>";
+		echo "success";
 ?>

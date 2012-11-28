@@ -47,11 +47,10 @@
 				echo "<h2 class='ui-li-heading'> From:".$userFrom['name']."</h2>";
 				echo "<p class='ui-li-desc'> Subject: ".$message['Subject']."</p></li>";
 				//now add the reply functionality
-				/*TODO ADD FUNCTIONALITY IN THE CASE THAT WE ARE NOT ADDING THE CORRECT ID*/
 				echo "<li data-role='fieldcontain' class='ui-field-contain ui-body ui-li ui-li-static'>";
 				echo "<form id='reply_form' name='reply_form' action='reply_message.php' method='post'>";
 				echo "<input type='hidden' name='thread_id' id='thread_id' value='".$_GET['thread_id']."'>";
-				echo "<input type='hidden' name='user_to' id='user_to' value='".$userFrom['userID']."'>";
+				echo "<input type='hidden' name='user_to' id='user_to' value='".$userTo['userID']."'>";
 				echo "<input type='hidden' name='subject_reply' id='subject_reply' value='".$message['Subject']."'>";
 				echo "<label for='textarea' class='ui-input-text'>";
 				echo "<textarea cols='60' rows='8' name='reply_message' id='reply_message' class='ui-input-text ui-body-c ui-shadow-inset'></textarea>";

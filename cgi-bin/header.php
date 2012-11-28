@@ -23,7 +23,12 @@ if(isset($_SESSION['logged_in']))
 		<?php
 		if(isset($_SESSION['logged_in']))
 		{
-			echo "<li><a href='mail.php' id='email' data-icon='mail-icon'>Mail</a></li>";
+			echo "<li>";
+			require_once "config.php";
+			$messages = mysql_query("SELECT * FROM threads WHERE UserIDConch='".$_SESSION['userID']."'");
+			echo "<a href='mail.php' id='email' data-icon='mail-icon'>Mail ";
+			echo "<span class='ui-li-count ui-btn-up-c ui-btn-corner-all'>".mysql_num_rows($messages)."</span>";
+			echo "</a></li>";
 			echo "<li><a href='profile.php' data-icon='custom' id='profile'>";
 			echo "Profile</a></li>";
 		}
