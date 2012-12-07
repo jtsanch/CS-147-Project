@@ -27,10 +27,11 @@ session_start();
 <?php
 	require_once 'config.php';
 	//Get the teacher id
+	$lesson_id = $_GET['lessonID'];
 	if($_GET['teacher_userID'] && $_GET['lessonID'])
 	{
 		$teacher = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='" . $_GET['teacher_userID'] . "'"));
-		$lessons = mysql_query("SELECT * FROM Lessons WHERE userID='" . $teacher['userID'] . "' AND lessonID='" . $_GET['lessonID'] . "'");
+		$lessons = mysql_query("SELECT * FROM Lessons WHERE lessonID='" . $_GET['lessonID'] . "'");
 	}
 	$user = mysql_fetch_array(mysql_query("SELECT * FROM Users WHERE userID='" . mysql_real_escape_string($_SESSION['userID']) . "'"));
 	?>
@@ -44,19 +45,40 @@ session_start();
 			} else echo "&nbsp;";
 			?>
 		</div>
-	<?php
-	//only display "message me" button if they are logged in//
-		echo "<center><div id='second_layer_teacher_profile'>";
-			echo "<div id='personal_info_container'>";
-				echo "<center><div id='teacher_name'> ".strtoupper($teacher['name'])."<br /><a href='mailto:".$teacher['email']."'>".$teacher['email']."</a></div></center>";
+
+		<div id='second_layer_teacher_profile'>
+			<div id='personal_info_container'>
+				<div id='teacher_name'> <?echo strtoupper($teacher['name']);?><br /><a href='mailto:<?echo $teacher['email'];?>'><? echo $teacher['email']; ?></a></div>
+				<?php
 				if(isset($_SESSION['logged_in'])) {
 				    echo "<div id='message_box'>";
 					echo "<a href='#message_popup' data-rel='popup' data-position-to='window' aria-haspopup='true' aria-owns='#message_popup' data-role='button'>";
 					echo "Message Me</a></div>";
 					}
-			echo "</div>";
-		echo "</div></center>";
-	?>
+				?>
+				<br/>
+					<!-- Handle the review system-->
+					<div id="rating-system">
+						<?php
+							//never have been rating before
+							$rating = $teacher['rating'];
+							if( $rating == -1 ) {
+								echo "This user has no ratings <br/>";
+							}
+							else{
+								echo "<div id='stars'>";
+								for( $i = 0; $i < $rating; ++$i){
+									echo "<img src='icons/star.png' />";
+								}
+								echo "</div><br/>";
+							}
+						?>
+					<a href="#rate_popup" data-rel="popup" data-position-to="window"  data-role="button"> Rate this Teacher! </a>
+					<br/>
+				</div>
+			</div>
+		</div>
+	
 		<div id="third_layer_profile">
 			<div class="lesson_info_container">
 				<div class="lesson_info">
@@ -65,7 +87,6 @@ session_start();
 					{
 					if($row = mysql_fetch_array($lessons))
 					{
-						echo "<center>";
 						echo "<div class='teacher_section'>";
 						echo "<div class='teacher_lesson_header'>Lesson Details</div><br/>";
 						echo $row['lesson_description'] . "<br/><br/>";
@@ -74,11 +95,27 @@ session_start();
 						echo "<div class='teacher_lesson_header'>Cost</div><br/>";
 						echo $row['cost'];
 						echo "</div>";
-						echo "</center>";
 					}
 					}
 					?>
-				</div>
+			<div class="teacher_ratings">
+			<?php
+				$ratings = mysql_query("SELECT * FROM Ratings WHERE teacher='".$teacher['userID']."'");
+				if(mysql_num_rows( $ratings ) > 0 ){
+					if($rating = mysql_fetch_array($ratings))
+					{
+						echo "<div id = 'rating_box'>";
+						for( $i = 0; $i < $rating['ratingStars']; ++$i){
+							echo "<img src='icons/star.png'/>";
+						}
+						echo "<br/>".$rating['ratingContent'];
+						echo "</div>";
+					}
+				} else {
+					echo "<div id='no_rating'> Sorry, this user has no ratings </div>";
+				}
+			?>
+			</div>
 			</div>
 			<div class="also_teaches_container">	
 				<div class="lesson_info">
@@ -86,37 +123,93 @@ session_start();
 					if($_GET['teacher_userID'] && $_GET['lessonID'])
 					{
 						$lessons = mysql_query("SELECT * FROM Lessons WHERE userID='" . $_GET['teacher_userID'] . "' AND lessonID<>'" . $_GET['lessonID'] . "'");
-						if($lessons) echo "<center><p class='teacher_lesson_header'>ALSO TEACHES</p></center>";
-						echo "<br/>";
+						if(mysql_num_rows($lessons) > 0 ) echo "<p class='teacher_lesson_header'>I also teach</p>";
 						while($row = mysql_fetch_array($lessons))
 						{
 							$skill = mysql_fetch_array(mysql_query("SELECT * FROM skills WHERE skillId='" . $row['skillID'] . "'"));
-							echo "<center><a href='teacherprofile.php?teacher_userID=".$_GET['teacher_userID'] . "&lessonID=" . $row['lessonID'] . "'>" . $skill['skillName'] . "</a></center><br/>";
+							echo "<a href='teacherprofile.php?teacher_userID=".$_GET['teacher_userID'] . "&lessonID=" . $row['lessonID'] . "'>" . $skill['skillName'] . "</a><br/>";
 						}
 					}
 					?>
 				</div>
 			</div>
 		</div>
-		</center>
 	</div>
-	<div data-role="popup" id="message_popup" class="ui-corner-all" data-position-to="window" data-dismissable="false">
+<div data-role="popup" id="message_popup" class="ui-corner-all" data-position-to="window" data-dismissable="false">
 	<form id="message_form" action="processmail.php" method="post">
-		<div style="padding:10px 20px;"><?php echo "Sending to : ".$teacher['name'] ?></label></td></tr>
+		<div style="padding:10px 20px; color:black !important;"><?php echo "Sending to : ".$teacher['name'] ?></label></td></tr>
 			<input type="hidden" name="sender" id="sender" value="<?php echo $_SESSION['userID']?>" />
 			<br/>
-			<input type="hidden" name="receiver" id="receiver" value="<?php echo $teacher['userID']?>"/>
-			<br/>
+			<input type="hidden" name="receiver" id="receiver" value="<?php echo $teacher['userID']; ?>"/>
+			<input type="hidden" name="lesson_id" id="lesson_id" value="<?php echo $lesson_id; ?>"/>
 			<input type="hidden" name="past_page" id="past_page" value="<?php echo curPageURL() ?>" />
-			<input type="text" name="subject" id= "subject" placeholder="Subject..." />
-			<textarea cols="60" rows="10" name="message" id="message_textarea" placeholder="Teach me!"></textarea>
+			<input type="text"  style='color:black !important;' name="subject" id= "subject" placeholder="Subject..." />
+			<textarea cols="60" style='color:black !important;' rows="10" name="message" id="message_textarea" placeholder="Teach me!"></textarea>
 
 	    	<input type="submit" name="send_message" id="send_message" value="Send"></input>
 			<a href="#" data-rel="back" data-role="button" data-theme="a">Cancel</a>
 		</div>
 	</form>
 </div>
+<div data-role="popup" id="rate_popup" class="ui-corner-all" data-position-to="window" data-dismissable="false">
+	<form id="rating_form" action="rate.php" method="post">
+		<div style="padding:10px 20px; color:black !important;">
+		<?php echo "Rating ".$teacher['name'] ?>
+			<input type="hidden" name="rated_teacher" id="sender" value="<?php echo $teacher['userID']; ?>" />
+			<input type="hidden" name="actual_rating" id="actual_rating" value="0"/>
+			<div data-role="controlgroup" data-type="horizontal">
+			<div class="rating">
+				<span id='one'>&#9734;</span><span id='two'>&#9734;</span><span id='three'>&#9734;</span><span id='four'>&#9734;</span><span id='five'>&#9734;</span>
+			</div>
+			<textarea cols="60" rows="5" name="rating_text" id="rating_text" placeholder="Thanks for your lesson!"></textarea>
 
+	    	<input type="submit" name="rate_user" id="rate_user" value="Rate!"></input>
+			<a href="#" data-rel="back" data-role="button" data-theme="a">Cancel</a>
+		</div>
+	</form>
+</div>
+<script>
+	$("#one").click(function() {
+	  $("#actual_rating").val(1);	
+	  $("#one").html("&#9733;");
+	  $("#two").html("&#9734;");
+	  $("#three").html("&#9734;");
+	  $("#four").html("&#9734;");
+	  $("#five").html("&#9734;");
+	});
+	$("#two").click(function() {
+	  $("#actual_rating").val(2);	
+	  $("#one").html("&#9733;");
+	  $("#two").html("&#9733;");
+	  $("#three").html("&#9734;");
+	  $("#four").html("&#9734;");
+	  $("#five").html("&#9734;");
+	});
+	$("#three").click(function() {
+	  $("#actual_rating").val(3);	
+	  $("#one").html("&#9733;");
+	  $("#two").html("&#9733;");
+	  $("#three").html("&#9733;");
+	  $("#four").html("&#9734;");
+	  $("#five").html("&#9734;");
+	});
+	$("#four").click(function() {
+	  $("#actual_rating").val(4);	
+	  $("#one").html("&#9733;");
+	  $("#two").html("&#9733;");
+	  $("#three").html("&#9733;");
+	  $("#four").html("&#9733;");
+	  $("#five").html("&#9734;");
+	});
+	$("#five").click(function() {
+	  $("#actual_rating").val(5);	
+	  $("#one").html("&#9733;");
+	  $("#two").html("&#9733;");
+	  $("#three").html("&#9733;");
+	  $("#four").html("&#9733;");
+	  $("#five").html("&#9733;");
+	});
+</script>
 <div data-role="popup" id="login_popup" data-overlay-theme="b" data-theme="a" class="ui-corner-all" data-position-to="window" data-dismissable="false">
 	    <form id="login_form" name="login_form" action="login.php" method="post">
 		<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" style=" float:left;">Close</a>
@@ -143,8 +236,8 @@ $(function(){
 			sender: $("#sender").val(),
 			past_page: $("#past_page").val(),
 			subject: $("#subject"),
+			lesson_id: $("#lesson_id"),
 			message: $("#message")};
-		
 		$.ajax({
 				type: "POST",
 				url: action,
@@ -163,12 +256,12 @@ $(function(){
 			$(this).popup('close');
 			return false;
 	});
-	
-	$("#login").click(function() {
-		var action = $("#login_form").attr("action");
+	$("#rate_user").click(function() {
+		var action = $("#rate_form").attr("action");
 		var form_data = {
-			email: $("#email").val(),
-			password: $("#password").val(),
+			teacher: $("#rated_teacher").val(),
+			rating_stars: $("#actual_rating").val(),
+			rating_text: $("#rating_text").val(),
 			is_ajax: 1
 		};
 		$.ajax({
@@ -183,6 +276,31 @@ $(function(){
 					else
 					{
 						location.reload();
+					}
+				}
+				});
+			$(this).popup('close');
+			return false;
+	});
+	$("#login").click(function() {
+		var action = $("#login_form").attr("action");
+		var form_data = {
+			email: $("#email").val(),
+			password: $("#password").val(),
+			is_ajax: 1
+		};
+		$.ajax({
+				type: "POST",
+				url: action,
+				data: form_data,
+				success: function(response) {
+					if( response == "success")
+					{
+						window.location.href = 'teacherprofile.php';
+					}
+					else
+					{
+						window.location.href = 'teacherprofile.php';
 					}
 				}
 			});

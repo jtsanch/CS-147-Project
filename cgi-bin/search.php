@@ -55,39 +55,40 @@
 	$query = "SELECT * FROM skills WHERE skillName SOUNDS LIKE '".$search_value."'"; 
 	$skill = mysql_query($query);
 
-	if(!$skill)
-	{
-		echo "<center><p><h2> No results found</h2> </p></center>";
-	}
-	else
-	{
+
 	$skill_row = mysql_fetch_assoc($skill);
 	
 	$query = "SELECT * FROM Lessons WHERE skillID='".$skill_row["skillId"]."' LIMIT ".$max_rows;
 	$lessons = mysql_query($query);
 	//construct list header
-	echo "<ul data-role='listview' class='ui=listview'>";
-	//construct list rows
-	
-	while($row = mysql_fetch_assoc($lessons))
+	if( mysql_num_rows($lessons) == 0 )
 	{
-		$query = "SELECT * FROM Users WHERE userID='".$row['userID']."'";
-		$user = mysql_query($query);
-		$user_row = mysql_fetch_assoc($user);
-		//now create the output! :D
-		echo "<li data-theme='c' class='ui-btn ui-btn-icon-right ui-li ui-btn-up-c'>";
-		echo "<div class='ui-btn-inner ui-li'>";
-		echo "<div class='ut-btn-text'>";
-		echo "<a href=teacherprofile.php?teacher_userID=".$row['userID']."&lessonID=".$row['lessonID'].">";
-		$skill = mysql_fetch_array( mysql_query("SELECT * FROM skills where skillId=".$row['skillID']));
-		echo "<h3 class='ui-li-heading'>".$skill['skillName']."</h3>";
-		echo "<p class='ui-li-desc'>".$user['name']."</p>";
-		echo "<p class='ui-li-desc'>Self-Experience Rating : ".$row['experience']."% </p>";
-		echo "<p class='ui-li-aside'>".$row['lesson_description']."</p>";
-		echo "<p class='ui-li-aside ui-li-desc'><strong>";
-		echo "$".$row['cost']." per hour </strong></p>";
-		echo "</a></div></div></li>";
+		echo "<center><p><h2> No results found</h2> </p></center>";
 	}
+	else
+	{
+		echo "<ul data-role='listview' class='ui=listview'>";
+		//construct list rows
+		
+		while($row = mysql_fetch_assoc($lessons))
+		{
+			$query = "SELECT * FROM Users WHERE userID='".$row['userID']."'";
+			$user = mysql_query($query);
+			$user_row = mysql_fetch_assoc($user);
+			//now create the output! :D
+			echo "<li data-theme='c' class='ui-btn ui-btn-icon-right ui-li ui-btn-up-c'>";
+			echo "<div class='ui-btn-inner ui-li'>";
+			echo "<div class='ut-btn-text'>";
+			echo "<a href=teacherprofile.php?teacher_userID=".$row['userID']."&lessonID=".$row['lessonID'].">";
+			$skill = mysql_fetch_array( mysql_query("SELECT * FROM skills where skillId=".$row['skillID']));
+			echo "<h3 class='ui-li-heading'>".$skill['skillName']."</h3>";
+			echo "<p class='ui-li-desc'>".$user['name']."</p>";
+			echo "<p class='ui-li-desc'>Self-Experience Rating : ".$row['experience']."% </p>";
+			echo "<p class='ui-li-aside'>".$row['lesson_description']."</p>";
+			echo "<p class='ui-li-aside ui-li-desc'><strong>";
+			echo "$".$row['cost']." per hour </strong></p>";
+			echo "</a></div></div></li>";
+		}
 	}
 ?>
 </div>

@@ -9,8 +9,9 @@ if($_POST)
 	$subject = mysql_real_escape_string($_REQUEST['subject']);
 	$message = mysql_real_escape_string($_REQUEST['message']);
 	$past_page = mysql_real_escape_string($_REQUEST['past_page']);
+	$lesson_id = mysql_real_escape_string($_REQUEST['lesson_id']);
 	//put a new thread in
-	mysql_query("INSERT INTO threads (initUserID, receiverUserID, UserIDConch) VALUES ('$senderID','$receiverID','$receiverID')") or die(mysql_error());  ;
+	mysql_query("INSERT INTO threads (initUserID, receiverUserID, UserIDConch, lessonID) VALUES ('$senderID','$receiverID','$receiverID','$lesson_id')") or die(mysql_error());  ;
 	$thread = mysql_fetch_array(mysql_query("SELECT * FROM threads WHERE initUserID='$senderID' AND receiverUserID='$receiverID'")) or die(mysql_error());  
 	//get the threadID so we can reference it later in with emails
 	$threadID = $thread['threadID'];

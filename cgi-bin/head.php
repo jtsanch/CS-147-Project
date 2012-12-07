@@ -7,8 +7,8 @@
     <!--<link rel="stylesheet" href="style.css" />-->
 	<link rel="stylesheet" href="main.css" /> 
 
-	<link rel="apple-touch-icon" href="appicon.png" />
-	<link rel="apple-touch-startup-image" href="startup.png">
+	<link rel="apple-touch-icon" href="icons/appicon.png" />
+	<link rel="apple-touch-startup-image" href="icons/newstartup.png">
 	
 	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
 	<script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>

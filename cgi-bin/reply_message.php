@@ -14,7 +14,16 @@
 		$thread_id = $_REQUEST['thread_id'];
 		$receiverUserID = $_REQUEST['user_to'];
 		$subject = $_REQUEST['subject_reply'];
+		$accept_lesson = $_REQUEST['accept_lesson'];
 		mysql_query("UPDATE threads SET UserIDConch='$receiverUserID' WHERE threadID='$thread_id'")or die(mysql_error());;
+		$thread = mysql_fetch_array(mysql_query("SELECT * FROM threads WHERE threadID='$thread_id'"));
+		if( intval($accept_lesson) && $thread['receiverUserID'] == $_SESSION['userID'] ){
+			mysql_query("UPDATE threads SET lessonAcceptedTeacher='$accept_lesson' WHERE threadID='$thread_id'")or die(mysql_error());;
+		}else 
+		if( intval($accept_lesson) )
+		{
+			mysql_query("UPDATE threads SET lessonAcceptedStudent='$accept_lesson' WHERE threadID='$thread_id'")or die(mysql_error());;			
+		}
 		mysql_query("INSERT INTO Mail (EmailFrom, EmailTo, Message, Subject, threadID) VALUES ('".$_SESSION['userID']."', '$receiverUserID', '$reply_message', '$subject', '$thread_id')")or die(mysql_error());;
 		echo "success";
 	}

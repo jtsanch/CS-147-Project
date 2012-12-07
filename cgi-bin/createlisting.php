@@ -9,7 +9,10 @@ if(!isset($_SESSION['logged_in']))
 
 <html>
 <head>
-	<?php include 'head.php';?>
+<?php include 'head.php';?>
+<script>
+	$("input[type='radio']").attr("checked",true).checkboxradio("refresh");
+</script>
 </head>
 <body>
 
@@ -32,14 +35,13 @@ if(!isset($_SESSION['logged_in']))
 <br>
 <form action="createlisting.php" method="post">
 	<div style="padding:10px 20px;">
-		<h3>Create Listing</h3>
+		<div class="profile_name_header" style='color:white !important;'>Create Listing</div>
         <label for="sk" class="ui-hidden-accessible">Skill*:</label>
         <input type="text" name="skillName" id="sk" value="" placeholder="Skill" />
 		<br />
 		<label for="ld" class="ui-hidden-accessible">Lesson Description*:</label>
-        <textarea cols="40" rows="8" name="lesson_description" id="ld" value="" placeholder="Lesson Description"></textarea>
+        <textarea cols="40" rows="8" name="lesson_description" id="ld" value="" placeholder="Describe your lessons . . ."></textarea>
         <br />
-		<label for="select-choice-0" name="category" class="select">Category:</label>
 		<select name="category" id="category">
 			<option value="sports">Sports</option>
 			<option value="music">Music</option>
@@ -48,15 +50,28 @@ if(!isset($_SESSION['logged_in']))
 			<option value="crafts">Crafts</option>
 			<option value="miscellaneous">Miscellaneous</option>
 		</select>
-		<label for="experience">Experience*:</label><br />
-		Beginner <input type="range" name="experience" id="slider-step" value="50" min="0" max="100" step="4" /> Advanced
-		<br />
+		<br/>
+		<div data-role="fieldcontain">
+			<fieldset  data-role="controlgroup"  class="ui-grid-b" data-type="horizontal" data-role="fieldcontain">
+				<!--<legend><div style="font-family:Helvetica;font-size:17px;color:#8A0808;padding-top:7px;padding-left:5px;">Experience</div></legend>-->
+				<input type="radio" name="experience_value" id="experience_value-1" value="1" />
+				<label for="experience_value-1">Beginner</label>
+
+				<input type="radio" name="experience_value" id="experience_value-2" value="2" checked="checked"  />
+				<label for="experience_value-2">Intermediate</label>
+
+				<input type="radio" name="experience_value" id="experience_value-3" value="3"  />
+				<label for="experience_value-3">Expert</label>
+			</fieldset>
+		</div>
+		<textarea cols="40" rows="8" name="experience" value="experience" id="experience" placeholder="Describe your experience . . ."></textarea>
+		<br/>
 		<label for="cst" class="ui-hidden-accessible">Cost Per Hour*:</label>
         <input type="text" name="cost" id="cst" value="" placeholder="Cost Per Hour"  />
 		<br />
-		<div class="profile_option">
-			<button type="submit" data-theme="b">create</button>
-		</div>
+		<center>
+		<input type='image' name='Submit' alt='submit' src='icons/create-chalk.png' value='Submit' id='create_button' class='create_button'/>
+		</center>
 	</div>
 </form>
 
@@ -82,24 +97,24 @@ if($_POST)
 	}
 	else{
 	require_once 'config.php';
-	
+
 	//grab the email and the user associated with it
 	$userID = $_SESSION['userID'];
-	
+
 	//grab the skill they are posting, along with the category they are choosing
 	$skillName = mysql_real_escape_string($_POST['skillName']);
 	$skillRows = mysql_query("SELECT * FROM skills WHERE skillName='$skillName'");
 	$category_text = mysql_real_escape_string($_POST['category']);
 	$category = mysql_fetch_array(mysql_query("Select * from categories where categoryName='$category_text'"));
 	$categoryID = $category['categoryID'];
-	
+
 	$skill = mysql_fetch_array($skillRows);
 	//make sure that the skill will exists
 	if(!(mysql_num_rows($skillRows) > 0 ))
 	{
 		mysql_query("INSERT INTO skills (skillName,categoryID) VALUES ('$skillName','$categoryID')");
 	}
-	
+
 	//else, we want to use the skillid we found
 	$skill = mysql_fetch_array(mysql_query("SELECT skillId FROM skills WHERE skillName='$skillName'"));
 	$skillID = $skill['skillId'];

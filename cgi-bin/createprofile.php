@@ -14,7 +14,9 @@
 <div id="content">
 	<form id='register' action='createprofile.php' method='post' accept-charset='UTF-8'>
 	<fieldset >
-		<legend> Register below!</legend>
+		<legend><div style="color: white !important; text-align: center; font-size:125;%">
+		Register below!
+		</div></legend>
 		<input type='hidden' name='submitted' id='submitted' value='1'/>
 		<label for='first_name' >First name: </label>
 		<input type='text' name='first_name' id='first_name' maxlength="50" />
@@ -26,7 +28,7 @@
 		<input type='password' name='password' id='password' maxlength="50" />
 		<label for='confirm_password' >Verify Password*:</label>
 		<input type='password' name='confirm_password' id='confirm_password' maxlength="50" />
-		<input type='submit' name='Submit' value='Submit' />
+		<input type='image' name='Submit' alt='submit' src='icons/create-chalk.png' value='Submit' id='create_button' class='create_button'/>
 	</fieldset>
 </form>
 <?php

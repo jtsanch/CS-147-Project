@@ -1,12 +1,4 @@
-<!DOCTYPE html> 
-<html> 
-	<head> 
-	<title>Page Title</title> 
-	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.css" />
-	<script type="text/javascript" src="http://code.jquery.com/jquery-1.5.2.min.js"></script>
-	<script type="text/javascript" src="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.js"></script>
-</head> 
-<body> 
+
 <?php
 	session_start();
 	require_once 'config.php';
@@ -16,7 +8,7 @@
 		$email = $_REQUEST['email'];
 		$password = $_REQUEST['password'];
 			
-		$user_rows = mysql_query("SELECT * FROM Users WHERE email='$email'");
+		$user_rows = mysql_query("SELECT * FROM Users WHERE email='$email'")or die(mysql_error());
 		if( mysql_num_rows( $user_rows ) > 0 )
 		{
 			
@@ -31,12 +23,12 @@
 				$_SESSION['name'] = $user['name'];
 				$_SESSION['logged_in'] = true;
 				$_SESSION['userID'] = $user['userID'];
-				$_SESSION['message'] = "<p class='success'> Login Success </p>";
+				$_SESSION['message'] = "<center> <img src='icons/signedin-text.png' />";
 				echo "success";
 			} 
 			else
 				{
-					$_SESSION['message'] = "<p class='error'> Wrong username/password </p>";
+					$_SESSION['message'] = "<center> <img src='icons/signedin-text.png' />";
 					echo "failure";
 				}
 		}
@@ -49,20 +41,3 @@
 	else
 		echo "failure";
 ?>
-<div data-role="page">
-
-	<div data-role="header">
-		<h1>Page Title</h1>
-	</div><!-- /header -->
-
-	<div data-role="content">	
-		<p>Page content goes here.</p>		
-	</div><!-- /content -->
-
-	<div data-role="footer">
-		<h4>Page Footer</h4>
-	</div><!-- /footer -->
-</div><!-- /page -->
-
-</body>
-</html>

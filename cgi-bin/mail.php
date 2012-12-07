@@ -15,7 +15,9 @@ if(!isset($_SESSION['logged_in']))
 <?php
 	include 'header.php';
 ?>
-
+<br/>
+<br/>
+<br/>
 <div id="inbox">
 	<?php
 	require_once 'config.php';
