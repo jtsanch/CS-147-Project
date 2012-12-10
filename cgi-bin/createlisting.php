@@ -43,12 +43,12 @@ if(!isset($_SESSION['logged_in']))
         <textarea cols="40" rows="8" name="lesson_description" id="ld" value="" placeholder="Describe your lessons . . ."></textarea>
         <br />
 		<select name="category" id="category">
-			<option value="sports">Sports</option>
-			<option value="music">Music</option>
-			<option value="writing">Art</option>
-			<option value="academics">Academics</option>
-			<option value="crafts">Crafts</option>
-			<option value="miscellaneous">Miscellaneous</option>
+			<option style='color:black !important;' value="sports">Sports</option>
+			<option style='color:black !important;' value="music">Music</option>
+			<option style='color:black !important;' value="writing">Art</option>
+			<option style='color:black !important;' value="academics">Academics</option>
+			<option style='color:black !important;' value="crafts">Crafts</option>
+			<option style='color:black !important;' value="miscellaneous">Miscellaneous</option>
 		</select>
 		<br/>
 		<div data-role="fieldcontain">
@@ -125,7 +125,7 @@ if($_POST)
 	$insert_query = "INSERT INTO Lessons (userID, lesson_description, experience, skillID, cost, categoryID) VALUES ('$userID','$lesson_description','$experience','$skillID','$cost','$categoryID')";
 	mysql_query($insert_query) or die(mysql_error());
 	$_SESSION['message'] = "<p class='success'>Listing created!</p>";
-	echo "<script> $.mobile.changePage( 'index.php', { transition: 'slideup'} ); </script>";
+	echo "<script> $.mobile.changePage( 'home.php', { transition: 'slideup'} ); </script>";
 	}
 }
 ?>

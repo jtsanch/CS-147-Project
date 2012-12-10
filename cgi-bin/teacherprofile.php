@@ -38,10 +38,10 @@ session_start();
 	<div id="profile_wrapper">
 		<div class="notice_top">
 			<?php
-			if(isset($_SESSION['notice']))
+			if(isset($_SESSION['message']))
 			{
-				echo $_SESSION['notice'];
-				unset($_SESSION['notice']);
+				echo $_SESSION['message'];
+				unset($_SESSION['message']);
 			} else echo "&nbsp;";
 			?>
 		</div>
@@ -60,18 +60,26 @@ session_start();
 					<!-- Handle the review system-->
 					<div id="rating-system">
 						<?php
+						if(isset($_SESSION['logged_in'])){
 							//never have been rating before
-							$rating = $teacher['rating'];
-							if( $rating == -1 ) {
-								echo "This user has no ratings <br/>";
+							$rating = mysql_query("SELECT AVG(starRating) FROM Ratings WHERE teacher='".$teacher['userID']."'");
+							if( mysql_num_rows($rating) > 0 ) {
+								$start_row = mysql_fetch_array($rating);
+								$stars = $start_row['AVG(starRating)'];
+								echo " $stars/5 Rating : ";
+								for($i = 0; $i < $stars; ++ $i){
+									echo "<span style='color:yellow !important;'>&#9733;</span>";
+								}
+								//get the last stars
+								$stars = $stars;
+								for( $i = $stars; $i < 5; ++$i ){
+									echo "<span style='color:yellow !important;'>&#9734;</span>";
+								}
 							}
 							else{
-								echo "<div id='stars'>";
-								for( $i = 0; $i < $rating; ++$i){
-									echo "<img src='icons/star.png' />";
-								}
-								echo "</div><br/>";
+								echo "This user has no ratings <br/>";
 							}
+						}
 						?>
 					<a href="#rate_popup" data-rel="popup" data-position-to="window"  data-role="button"> Rate this Teacher! </a>
 					<br/>
@@ -99,18 +107,31 @@ session_start();
 					}
 					?>
 			<div class="teacher_ratings">
-			<?php
+			<?php/
 				$ratings = mysql_query("SELECT * FROM Ratings WHERE teacher='".$teacher['userID']."'");
 				if(mysql_num_rows( $ratings ) > 0 ){
-					if($rating = mysql_fetch_array($ratings))
+				echo "<div id='overall-rating-box' class='overall-rating-box'>";
+				echo "<br/> <h3> Ratings</h3>";
+					while($rating = mysql_fetch_array($ratings) )
 					{
-						echo "<div id = 'rating_box'>";
-						for( $i = 0; $i < $rating['ratingStars']; ++$i){
-							echo "<img src='icons/star.png'/>";
+						echo "<div id = 'rating_box' style='padding-bottom: 20px; border-style:solid; border-color:#A4A4A4; border-width:1px;font-size:130%;'>";
+						$stars = $rating['starRating'];
+						if( $rating['starRating'] > 0 ){
+							echo " $stars/5 Rating : ";
+							for($i = 0; $i < $stars; ++ $i){
+								echo "<span style='color:yellow !important;'>&#9733;</span>";
+							}
+							//get the last stars
+							$stars = $stars;
+							for( $i = $stars; $i < 5; ++$i ){
+								echo "<span style='color:yellow !important;'>&#9734;</span>";
+							}
+							echo "<br/><div id='rating_content' style='color:black;'>";
+							echo "Anonymous Student : ".$rating['ratingContent'];
 						}
-						echo "<br/>".$rating['ratingContent'];
-						echo "</div>";
+						echo "</div></div><br/>";
 					}
+				echo "</div><br/>";
 				} else {
 					echo "<div id='no_rating'> Sorry, this user has no ratings </div>";
 				}
@@ -127,7 +148,7 @@ session_start();
 						while($row = mysql_fetch_array($lessons))
 						{
 							$skill = mysql_fetch_array(mysql_query("SELECT * FROM skills WHERE skillId='" . $row['skillID'] . "'"));
-							echo "<a href='teacherprofile.php?teacher_userID=".$_GET['teacher_userID'] . "&lessonID=" . $row['lessonID'] . "'>" . $skill['skillName'] . "</a><br/>";
+							echo "<a style='color:#333b8d' href='teacherprofile.php?teacher_userID=".$_GET['teacher_userID'] . "&lessonID=" . $row['lessonID'] . "'>" . $skill['skillName'] . "</a><br/>";
 						}
 					}
 					?>
@@ -152,10 +173,10 @@ session_start();
 	</form>
 </div>
 <div data-role="popup" id="rate_popup" class="ui-corner-all" data-position-to="window" data-dismissable="false">
-	<form id="rating_form" action="rate.php" method="post">
+	<form id="rate_form" class='rate_form' action="rate.php" method="post">
 		<div style="padding:10px 20px; color:black !important;">
 		<?php echo "Rating ".$teacher['name'] ?>
-			<input type="hidden" name="rated_teacher" id="sender" value="<?php echo $teacher['userID']; ?>" />
+			<input type="hidden" name="rated_teacher" id="rated_teacher" value="<?php echo $teacher['userID']; ?>" />
 			<input type="hidden" name="actual_rating" id="actual_rating" value="0"/>
 			<div data-role="controlgroup" data-type="horizontal">
 			<div class="rating">
@@ -177,14 +198,16 @@ session_start();
 	  $("#four").html("&#9734;");
 	  $("#five").html("&#9734;");
 	});
+	
 	$("#two").click(function() {
-	  $("#actual_rating").val(2);	
+	  $("#actual_rating").html(2);	
 	  $("#one").html("&#9733;");
 	  $("#two").html("&#9733;");
 	  $("#three").html("&#9734;");
 	  $("#four").html("&#9734;");
 	  $("#five").html("&#9734;");
 	});
+	
 	$("#three").click(function() {
 	  $("#actual_rating").val(3);	
 	  $("#one").html("&#9733;");
@@ -193,6 +216,7 @@ session_start();
 	  $("#four").html("&#9734;");
 	  $("#five").html("&#9734;");
 	});
+	
 	$("#four").click(function() {
 	  $("#actual_rating").val(4);	
 	  $("#one").html("&#9733;");
@@ -201,6 +225,7 @@ session_start();
 	  $("#four").html("&#9733;");
 	  $("#five").html("&#9734;");
 	});
+	
 	$("#five").click(function() {
 	  $("#actual_rating").val(5);	
 	  $("#one").html("&#9733;");
@@ -252,12 +277,14 @@ $(function(){
 						location.reload();
 					}
 				}
-				});
+			});
 			$(this).popup('close');
 			return false;
 	});
+	
 	$("#rate_user").click(function() {
 		var action = $("#rate_form").attr("action");
+		console.log("rating user!");
 		var form_data = {
 			teacher: $("#rated_teacher").val(),
 			rating_stars: $("#actual_rating").val(),
@@ -282,31 +309,7 @@ $(function(){
 			$(this).popup('close');
 			return false;
 	});
-	$("#login").click(function() {
-		var action = $("#login_form").attr("action");
-		var form_data = {
-			email: $("#email").val(),
-			password: $("#password").val(),
-			is_ajax: 1
-		};
-		$.ajax({
-				type: "POST",
-				url: action,
-				data: form_data,
-				success: function(response) {
-					if( response == "success")
-					{
-						window.location.href = 'teacherprofile.php';
-					}
-					else
-					{
-						window.location.href = 'teacherprofile.php';
-					}
-				}
-			});
-		$(this).popup('close');
-		return false;
-	});
+	
 	$("#logout").click(function() {
 		var action = $("#logout_button").attr("action");
 		$.ajax({

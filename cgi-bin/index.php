@@ -7,18 +7,21 @@
 				"true",
 				time() + (20 * 365 * 24 * 60 * 60)
 		);
-			
+		
 		session_start();
 		/* Check to see if the user is logged in first, and that the cookie doesn't exist*/
 		if (!isset($_SESSION['logged_in']) ){
 			echo "<script> function showIntro(){ $( '#userIntro').popup( 'open') } </script>";
 			echo "<script> setTimeout(showIntro, 1222); </script>";
 		}
+		else{
+			echo "<script> $.mobile.changePage( 'home.php', {}); </script>";
+		}
 	}
 	else
 	{
 		if( isset($_SESSION['logged_in']) ){
-			header( 'Location: index.php' ) ;
+			echo "<script> $.mobile.changePage( 'home.php', {}); </script>";
 		}
 		session_start();
 	}
@@ -43,11 +46,11 @@ $(function(){
 				success: function(response) {
 					if( response == "success")
 					{
-						window.location.href = 'home.php';
+						window.location.replace("home.php");
 					}
 					else
 					{
-						window.location.href = 'home.php';
+						window.location.replace("home.php");
 					}
 				}
 			});
@@ -94,7 +97,7 @@ $(function(){
 	<center>
 	Search for a new skill
 	<form action="search.php" method="post">
-		<div data-role="fieldcontain">
+		<div data-role="fieldcontain" style='height:auto !important;'>
 			<input type="search" name="skill_search" id="skill_search" value="" placeholder="Search..." />
 		</div>
 	</form>

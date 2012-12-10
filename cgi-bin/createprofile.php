@@ -14,7 +14,7 @@
 <div id="content">
 	<form id='register' action='createprofile.php' method='post' accept-charset='UTF-8'>
 	<fieldset >
-		<legend><div style="color: white !important; text-align: center; font-size:125;%">
+		<legend><div style="color: white !important; text-align: center;">
 		Register below!
 		</div></legend>
 		<input type='hidden' name='submitted' id='submitted' value='1'/>

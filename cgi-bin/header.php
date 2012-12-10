@@ -23,7 +23,7 @@ if( isset($_SESSION['logged_in'])){
 #div-1 { float: left; }
 #div-2 { display: inline; }
 #div-3 { float: right; }
-	echo '<div  class="ui-grid-b" style="text-align: center;">';
+	echo '<div  class="ui-grid-b" style="padding-top: 10px !important; text-align: center;">';
 	echo '<a href="home.php" id="home" style="float:left;"><img src="icons/home-chalk.png"/></a>';
 	require_once "config.php";
 	$messages = mysql_query("SELECT * FROM threads WHERE UserIDConch='".$_SESSION['userID']."'");
